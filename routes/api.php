@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,11 +16,14 @@ use App\Http\Controllers\AuthController;
 */
 
 
-// Auth Routes
+// Auth Routes (unguarded)
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::middleware('auth:api')->group(function () {
+    // Auth Routes (guarded)
     Route::get('/user', [AuthController::class, 'getUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    // Product Routes (guarded)
+    Route::resource('/products', ProductController::class);
 });
