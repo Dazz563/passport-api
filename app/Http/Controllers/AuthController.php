@@ -18,7 +18,10 @@ class AuthController extends Controller
         $data['password'] = Hash::make($data['password']);
 
         $newUser = User::create($data);
-        return response()->json(['message' => 'Success', 'data' => $newUser]);
+
+        $token = $newUser->createToken('auth_token')->accessToken;
+
+        return response()->json(['message' => 'Success', 'data' => $newUser, 'token' => $token], 201);
     }
 
 
@@ -32,8 +35,9 @@ class AuthController extends Controller
             ]);
         }
 
-        return response()->json($user->createToken('auth_token')->accessToken);
-        // return $user->createToken('auth_token')->accessToken;
+        $token = $user->createToken('auth_token')->accessToken;
+
+        return response()->json(['message' => 'Success', 'data' => $user, 'token' => $token], 200);
     }
 
     public function getUser()
