@@ -18,7 +18,7 @@ class AuthController extends Controller
         $data['password'] = Hash::make($data['password']);
 
         $newUser = User::create($data);
-
+        $newUser->assignRole('viewer');
         $token = $newUser->createToken('auth_token')->accessToken;
 
         return response()->json(['message' => 'Success', 'data' => $newUser, 'token' => $token], 201);

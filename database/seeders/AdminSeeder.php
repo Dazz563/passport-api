@@ -3,11 +3,12 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
-class UserSeeder extends Seeder
+class AdminSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,16 +17,15 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        User::truncate(); // deletes all records from the users table
         $faker = Faker::create();
-        foreach (range(1, 10) as $index) {
+        foreach (range(1, 3) as $index) {
             $user = User::create([
                 'name' => $faker->name(),
                 'email' => $faker->unique()->email(),
                 'email_verified_at' => now(),
                 'password' => Hash::make('password'),
             ]);
-            $user->assignRole('viewer');
+            $user->assignRole('admin', 'user', 'viewer');
         }
     }
 }
