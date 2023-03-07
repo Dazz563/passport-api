@@ -20,6 +20,7 @@ use App\Http\Controllers\ProductController;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/forgot_password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset_password_with_token', [AuthController::class, 'resetPasswordWithToken']);
 
 Route::middleware('auth:api')->group(function () {
     // Auth Routes (guarded)
