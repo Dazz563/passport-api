@@ -19,11 +19,12 @@ use App\Http\Controllers\ProductController;
 // Auth Routes (unguarded)
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/forgot_password', [AuthController::class, 'forgotPassword']);
 
 Route::middleware('auth:api')->group(function () {
     // Auth Routes (guarded)
     Route::get('/user', [AuthController::class, 'getUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
     // Product Routes (guarded)
-    Route::resource('/products', ProductController::class);
+    Route::resource('/products', ProductController::class)->middleware('role:admin|user');
 });
