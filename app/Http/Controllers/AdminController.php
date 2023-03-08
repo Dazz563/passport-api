@@ -28,12 +28,23 @@ class AdminController extends Controller
         $newUser = User::create($data);
         $newUser->assignRole('user');
 
-        return response()->json(['message' => 'Success admin created', 'data' => $newUser], 201);
+        return response()->json(['message' => 'Success user created', 'data' => $newUser], 201);
     }
 
     public function getUsers()
     {
-        $users = User::get()->load('roles');
+        $users = User::get()->load('roles:name');
+
+        $users->transform(function ($user) {
+            $user->roles->transform(function ($role) {
+                unset($role->pivot);
+                return $role;
+            });
+
+            $user->roles = $user->roles->pluck('name');
+
+            return $user;
+        });
 
         return response()->json(['message' => 'Success', 'data' => $users], 200);
     }

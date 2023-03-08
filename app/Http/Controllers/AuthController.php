@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\User;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Mail\ForgotPasswordEmail;
 use App\Http\Requests\LoginRequest;
@@ -32,18 +31,24 @@ class AuthController extends Controller
 
     public function login(LoginRequest $req)
     {
-        $user = User::where('email', $req->email)->first()->load('roles');
+        try {
+            $user = User::where('email', $req->email)->firstOrFail()->load('roles');
 
-        if (!$user || !Hash::check($req->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'message' => ['The provided credentials are incorrect']
-            ]);
+            if (!Hash::check($req->password, $user->password)) {
+                throw ValidationException::withMessages([
+                    'message' => ['The provided credentials are incorrect']
+                ]);
+            }
+
+            $token = $user->createToken('auth_token')->accessToken;
+
+            return response()->json(['message' => 'Success', 'data' => $user, 'token' => $token], 200);
+        } catch (\Exception $e) {
+            // Log the exception or handle it in some other way
+            return response()->json(['message' => 'Unable to process request'], 500);
         }
-
-        $token = $user->createToken('auth_token')->accessToken;
-
-        return response()->json(['message' => 'Success', 'data' => $user, 'token' => $token], 200);
     }
+
 
     public function getUser()
     {
@@ -58,38 +63,31 @@ class AuthController extends Controller
 
     public function forgotPassword(Request $req)
     {
+
         $user = User::where([
             ["email", $req->email]
         ])->first();
 
         if ($user) {
-            #Create password reset request
-            $resetToken = Str::uuid()->toString();
-            $passwordResetRequest = PasswordResetRequest::create([
+            $resetToken = uniqid();
+            PasswordResetRequest::create([
                 'user_id' => $user->id,
                 'reset_token' => $resetToken,
             ]);
 
-            try {
-                $redirectUrl = env('WEB_APP_URL') . 'reset-password/' . $resetToken;
+            $redirectUrl = env('WEB_APP_URL') . 'reset-password/' . $resetToken;
 
-                $data = [
-                    'recipientName' => $user->name,
-                    'textOne' => 'You have requested a password reset.',
-                    'textTwo' => 'Click the button below to reset your password.',
-                    'buttonText' => 'Reset password',
-                    'buttonLink' => $redirectUrl,
-                ];
+            $data = [
+                'recipientName' => $user->name,
+                'textOne' => 'You have requested a password reset.',
+                'textTwo' => 'Click the button below to reset your password.',
+                'buttonText' => 'Reset password',
+                'buttonLink' => $redirectUrl,
+            ];
 
-                Mail::to($user->email)->send(new ForgotPasswordEmail($data));
+            Mail::to($user->email)->send(new ForgotPasswordEmail($data));
 
-                return response()->json(['data' => $user], 200);
-            } catch (\Exception $e) {
-                // Log::debug($e);
-                return response()->json(['error' => 'An error occurred sending your reset password email.'], 200);
-            }
-
-            return response()->json(['data' => $passwordResetRequest], 201);
+            return response()->json(['Success' => 'Email sent to user'], 200);
         } else {
             return response()->json(["error" => "No user found with that email"], 404);
         }
@@ -97,11 +95,9 @@ class AuthController extends Controller
 
     public function resetPasswordWithToken(Request $req)
     {
+
         // Fetch the password reset request by reset token from the database
         $passwordResetRequest = PasswordResetRequest::where('reset_token', $req->token)->first();
-
-        // Default error message
-        $errorMessage = "An error occurred, please try again later.";
 
         // Check if password reset request exists
         if ($passwordResetRequest) {
@@ -131,22 +127,19 @@ class AuthController extends Controller
                         return response()->json(["data" => $user], 200);
                     } else {
                         // Set error message for user not found
-                        $errorMessage = "Could not find an account associated with this reset token.";
+                        return response()->json(["error" => 'Could not find an account associated with this reset token.'], 404);
                     }
                 } else {
                     // Set error message for expired token
-                    $errorMessage = "Password reset token has expired, please try again.";
+                    return response()->json(["error" => 'Password reset token has expired, please try again.'], 419);
                 }
             } else {
                 // Set error message for already used token
-                $errorMessage = "This reset token has already been used.";
+                return response()->json(["error" => 'This reset token has already been used.'], 409);
             }
         } else {
             // Set error message for invalid request
-            $errorMessage = "Could not validate this password reset request.";
+            return response()->json(["error" => 'Could not validate this password reset request.'], 400);
         }
-
-        // Return a JSON response with error message
-        return response()->json(["error" => $errorMessage], 500);
     }
 }
