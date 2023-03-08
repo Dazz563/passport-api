@@ -32,7 +32,7 @@ class AuthController extends Controller
 
     public function login(LoginRequest $req)
     {
-        $user = User::where('email', $req->email)->first();
+        $user = User::where('email', $req->email)->first()->load('roles');
 
         if (!$user || !Hash::check($req->password, $user->password)) {
             throw ValidationException::withMessages([

@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        User::truncate(); // deletes all records from the users table
+        User::whereNotNull('id')->delete();
         $faker = Faker::create();
         foreach (range(1, 10) as $index) {
             $user = User::create([

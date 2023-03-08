@@ -2,10 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class RoleSeeder extends Seeder
 {
@@ -16,8 +17,14 @@ class RoleSeeder extends Seeder
      */
     public function run()
     {
-        Role::create(['name' => 'admin']);
-        Role::create(['name' => 'user']);
-        Role::create(['name' => 'viewer']);
+        $users = User::all();
+        foreach ($users as $user) {
+            $user->roles()->detach();
+        }
+        // use this method for relations 
+        Role::whereNotNull('id')->delete();
+        Role::create(['name' => 'admin', 'guard_name' => 'api']);
+        Role::create(['name' => 'user', 'guard_name' => 'api']);
+        Role::create(['name' => 'viewer', 'guard_name' => 'api']);
     }
 }

@@ -3,7 +3,7 @@
 <p>Dear {{ $data['recipientName'] }}</p>
 <p>{{ $data['textOne'] }}</p>
 <p>{{ $data['textTwo'] }}</p>
-<p>{{ $data['buttonLink'] }}</p>
+
 
 <a href="{{ $data['buttonLink'] }}" style="display: inline-block; background-color: #007bff; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none;">{{ $data['buttonText'] }}</a>
 

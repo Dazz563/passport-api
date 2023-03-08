@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
@@ -22,10 +23,15 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/forgot_password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset_password_with_token', [AuthController::class, 'resetPasswordWithToken']);
 
+// (guarded)
 Route::middleware('auth:api')->group(function () {
-    // Auth Routes (guarded)
+    // Auth Routes 
     Route::get('/user', [AuthController::class, 'getUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
-    // Product Routes (guarded)
+    // Admin Routes
+    Route::post('/create_admin', [AdminController::class, 'registerAdmin'])->middleware('role:admin');
+    Route::post('/create_user', [AdminController::class, 'registerUser'])->middleware('role:admin');
+    Route::get('/get_all_users', [AdminController::class, 'getUsers'])->middleware('role:admin');
+    // Product Routes
     Route::resource('/products', ProductController::class)->middleware('role:admin|user');
 });
