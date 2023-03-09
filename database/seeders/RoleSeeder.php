@@ -24,7 +24,7 @@ class RoleSeeder extends Seeder
         // use this method for relations 
         Role::whereNotNull('id')->delete();
         Role::create(['name' => 'admin', 'guard_name' => 'api']);
+        Role::create(['name' => 'vendor', 'guard_name' => 'api']);
         Role::create(['name' => 'user', 'guard_name' => 'api']);
-        Role::create(['name' => 'viewer', 'guard_name' => 'api']);
     }
 }

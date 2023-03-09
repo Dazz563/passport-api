@@ -29,9 +29,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/user', [AuthController::class, 'getUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
     // Admin Routes
-    Route::post('/create_admin', [AdminController::class, 'registerAdmin'])->middleware('role:admin');
     Route::post('/create_user', [AdminController::class, 'registerUser'])->middleware('role:admin');
     Route::get('/get_all_users', [AdminController::class, 'getUsers'])->middleware('role:admin');
+    Route::post('/edit_roles/{id}', [AdminController::class, 'editRoles'])->middleware('role:admin');
     // Product Routes
-    Route::resource('/products', ProductController::class)->middleware('role:admin|user');
+    Route::resource('/products', ProductController::class)->middleware('role:admin|vendor');
 });

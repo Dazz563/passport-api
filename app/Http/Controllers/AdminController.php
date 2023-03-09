@@ -9,31 +9,10 @@ use App\Http\Requests\RegisterRequest;
 
 class AdminController extends Controller
 {
-    public function registerAdmin(RegisterRequest $req)
-    {
-        $data = $req->all();
-        $data['password'] = Hash::make($data['password']);
-
-        $newUser = User::create($data);
-        $newUser->assignRole('admin');
-
-        return response()->json(['message' => 'Success admin created', 'data' => $newUser], 201);
-    }
-
-    public function registerUser(RegisterRequest $req)
-    {
-        $data = $req->all();
-        $data['password'] = Hash::make($data['password']);
-
-        $newUser = User::create($data);
-        $newUser->assignRole('user');
-
-        return response()->json(['message' => 'Success user created', 'data' => $newUser], 201);
-    }
 
     public function getUsers()
     {
-        $users = User::get()->load('roles:name');
+        $users = User::orderBy('created_at', 'desc')->withTrashed()->get()->load('roles:name');
 
         $users->transform(function ($user) {
             $user->roles->transform(function ($role) {
@@ -46,6 +25,85 @@ class AdminController extends Controller
             return $user;
         });
 
+
         return response()->json(['message' => 'Success', 'data' => $users], 200);
+    }
+
+    public function registerUser(RegisterRequest $req)
+    {
+        $data = $req->all();
+        $data['password'] = Hash::make($data['password']);
+
+        $newUser = User::create($data);
+
+        // Check if the admin role is requested and assign it to the new user
+        if ($req->has('admin') && $req->input('admin') == true) {
+            $newUser->assignRole('admin');
+        }
+
+        // Check if the user role is requested and assign it to the new user
+        if ($req->has('user') && $req->input('user') == true) {
+            $newUser->assignRole('user');
+        }
+
+        // Check if the vendor role is requested and assign it to the new user
+        if ($req->has('vendor') && $req->input('vendor') == true) {
+            $newUser->assignRole('vendor');
+        }
+
+        return response()->json(['message' => 'Success user created', 'data' => $newUser], 201);
+    }
+
+
+    public function editRoles(Request $req, $id)
+    {
+        // Get the user with the given ID, including soft deleted users
+        $user = User::withTrashed()->findOrFail($id);
+
+        // Update users details 
+        $user->name = $req->name;
+        $user->email = $req->email;
+        $user->update();
+
+        // Create an array of all possible roles
+        $roles = ['admin', 'vendor', 'user'];
+
+        // Initialize a flag to check if all roles are false
+        $allRolesFalse = true;
+
+        // Check if the user is soft deleted
+        if ($user->trashed()) {
+            // If the user is soft deleted and there are true roles in the request, restore them
+            foreach ($roles as $role) {
+                if ($req->input($role)) {
+                    $user->restore();
+                    break;
+                }
+            }
+        }
+
+        // Iterate over each role and check if it was sent in the request
+        foreach ($roles as $role) {
+            if ($req->input($role)) {
+                // If the role was sent in the request, add it to the new roles array and set the flag to false
+                $newRoles[] = $role;
+                $allRolesFalse = false;
+            } else {
+                // If the role was not sent in the request, remove it from the user
+                $user->removeRole($role);
+            }
+        }
+
+        // If all roles are false, soft delete the user and return a JSON response
+        if ($allRolesFalse) {
+            $user->delete();
+            return response()->json(['message' => 'User deleted'], 200);
+        }
+
+        // Update the user's roles based on the new roles array
+        $user->syncRoles($newRoles ?? []);
+
+        // Return a JSON response indicating success and the updated user object
+        return response()->json(['message' => 'Roles assigned successfully', 'data' => $user], 200);
     }
 }

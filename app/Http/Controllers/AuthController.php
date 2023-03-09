@@ -22,39 +22,46 @@ class AuthController extends Controller
         $data['password'] = Hash::make($data['password']);
 
         $newUser = User::create($data);
-        $newUser->assignRole('viewer');
+        $newUser->assignRole('user');
         $token = $newUser->createToken('auth_token')->accessToken;
 
         return response()->json(['message' => 'Success', 'data' => $newUser, 'token' => $token], 201);
     }
 
-
     public function login(LoginRequest $req)
     {
-        try {
-            $user = User::where('email', $req->email)->firstOrFail()->load('roles');
+        $user = User::where('email', $req->email)->first();
+
+        if (!$user) {
+            return response()->json(["error" => "No user with that email exists"], 404);
+        } else {
+            $user->load('roles:name');
 
             if (!Hash::check($req->password, $user->password)) {
-                throw ValidationException::withMessages([
-                    'message' => ['The provided credentials are incorrect']
-                ]);
+                return response()->json(["error" => "The provided credentials are incorrect"], 403);
             }
 
             $token = $user->createToken('auth_token')->accessToken;
 
             return response()->json(['message' => 'Success', 'data' => $user, 'token' => $token], 200);
-        } catch (\Exception $e) {
-            // Log the exception or handle it in some other way
-            return response()->json(['message' => 'Unable to process request'], 500);
         }
     }
 
-
     public function getUser()
     {
-        $user = Auth::user();
+        $user = Auth::user()->load('roles:name');
+
+        // remove all the other metadata
+        $user->roles->map(function ($role) {
+            unset($role->pivot);
+            return $role;
+        });
+
+        $user->roles = $user->roles->pluck('name');
+
         return response()->json(['data' => $user]);
     }
+
 
     public function logout(Request $req)
     {
