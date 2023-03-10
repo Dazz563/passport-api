@@ -106,4 +106,23 @@ class AdminController extends Controller
         // Return a JSON response indicating success and the updated user object
         return response()->json(['message' => 'Roles assigned successfully', 'data' => $user], 200);
     }
+
+    public function deleteUser(User $user)
+    {
+        $user = User::where('id', $user->id)->delete();
+
+        return response()->json(['message' => $user], 204);
+    }
+
+    public function restoreUser($id)
+    {
+        $user = User::withTrashed()->find($id);
+
+        if ($user) {
+            $user->restore();
+            return response()->json(['message' => 'User restored successfully'], 200);
+        } else {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+    }
 }

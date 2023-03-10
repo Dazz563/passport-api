@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\RegisterRequest;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -148,5 +147,15 @@ class AuthController extends Controller
             // Set error message for invalid request
             return response()->json(["error" => 'Could not validate this password reset request.'], 400);
         }
+    }
+
+    public function uploadRegisterAvatarImage(Request $req)
+    {
+        $file = $req->file('file');
+        $dt = Carbon::now();
+        $filename = $dt->format('YmdHis') . uniqid() . '.' . $file->getClientOriginalExtension();
+        $file->storeAs('public/avatars', $filename);
+
+        return response()->json(["data" => $filename], 200);
     }
 }

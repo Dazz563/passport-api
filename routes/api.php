@@ -22,6 +22,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/forgot_password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset_password_with_token', [AuthController::class, 'resetPasswordWithToken']);
+Route::post('/upload_avatar', [AuthController::class, 'uploadRegisterAvatarImage']);
 
 // (guarded)
 Route::middleware('auth:api')->group(function () {
@@ -32,6 +33,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/create_user', [AdminController::class, 'registerUser'])->middleware('role:admin');
     Route::get('/get_all_users', [AdminController::class, 'getUsers'])->middleware('role:admin');
     Route::post('/edit_roles/{id}', [AdminController::class, 'editRoles'])->middleware('role:admin');
+    Route::delete('/delete_user/{user}', [AdminController::class, 'deleteUser'])->middleware('role:admin');
+    Route::put('/restore_user/{id}', [AdminController::class, 'restoreUser'])->middleware('role:admin');
     // Product Routes
     Route::resource('/products', ProductController::class)->middleware('role:admin|vendor');
 });
