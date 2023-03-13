@@ -29,6 +29,7 @@ class RegisterRequest extends FormRequest
             'email' => 'required|email',
             'password' => 'required',
             'name' => 'required',
+            // 'avatar' => 'required',
         ];
     }
 

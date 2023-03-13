@@ -151,6 +151,10 @@ class AuthController extends Controller
 
     public function uploadRegisterAvatarImage(Request $req)
     {
+        $req->validate([
+            'file' => 'required|image',
+        ]);
+
         $file = $req->file('file');
         $dt = Carbon::now();
         $filename = $dt->format('YmdHis') . uniqid() . '.' . $file->getClientOriginalExtension();

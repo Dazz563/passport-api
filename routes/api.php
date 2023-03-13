@@ -32,7 +32,7 @@ Route::middleware('auth:api')->group(function () {
     // Admin Routes
     Route::post('/create_user', [AdminController::class, 'registerUser'])->middleware('role:admin');
     Route::get('/get_all_users', [AdminController::class, 'getUsers'])->middleware('role:admin');
-    Route::post('/edit_roles/{id}', [AdminController::class, 'editRoles'])->middleware('role:admin');
+    Route::post('/edit_roles/{id}', [AdminController::class, 'updateUser'])->middleware('role:admin');
     Route::delete('/delete_user/{user}', [AdminController::class, 'deleteUser'])->middleware('role:admin');
     Route::put('/restore_user/{id}', [AdminController::class, 'restoreUser'])->middleware('role:admin');
     // Product Routes

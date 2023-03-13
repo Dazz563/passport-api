@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\RegisterRequest;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -55,7 +56,7 @@ class AdminController extends Controller
     }
 
 
-    public function editRoles(Request $req, $id)
+    public function updateUser(Request $req, $id)
     {
         // Get the user with the given ID, including soft deleted users
         $user = User::withTrashed()->findOrFail($id);
@@ -63,7 +64,16 @@ class AdminController extends Controller
         // Update users details 
         $user->name = $req->name;
         $user->email = $req->email;
+
+        $oldAvatar = $user->avatar;
+
+        $user->avatar = $req->avatar;
         $user->update();
+
+        // deleteing old avatar
+        if ($oldAvatar != "/fallback-avatar.png" && $oldAvatar !== $user->avatar) {
+            Storage::delete(str_replace("/storage/", "public/", $oldAvatar));
+        }
 
         // Create an array of all possible roles
         $roles = ['admin', 'vendor', 'user'];
