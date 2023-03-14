@@ -25,6 +25,8 @@ class ProductSeeder extends Seeder
                 'title' => $faker->word(),
                 'description' => $faker->sentence(),
                 'price' => $faker->randomFloat(2, 10, 10000),
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
             $products[] = $product;
         }
