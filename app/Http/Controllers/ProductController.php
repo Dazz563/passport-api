@@ -84,7 +84,7 @@ class ProductController extends Controller
      */
     public function update(Request $req, $id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::withTrashed()->findOrFail($id);
 
         // check to see that the user id hasn't been tampered with in the request 
         if (Auth::user()->id != $product->user_id) {

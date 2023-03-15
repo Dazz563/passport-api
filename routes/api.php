@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductImageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,4 +39,6 @@ Route::middleware('auth:api')->group(function () {
     // Product Routes
     Route::put('/restore_product/{id}', [ProductController::class, 'restoreProduct'])->middleware('role:admin|vendor');
     Route::resource('/products', ProductController::class)->middleware('role:admin|vendor');
+    // Product Image Routes
+    Route::post('/upload_product_images', [ProductImageController::class, 'uploadProductImages'])->middleware('role:admin|vendor');
 });
