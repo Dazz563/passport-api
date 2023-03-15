@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\ProductRequest;
 
 class ProductController extends Controller
@@ -17,7 +19,7 @@ class ProductController extends Controller
     {
         $user_id = $req->user()->id;
 
-        $products = Product::where('user_id', $user_id)->get();
+        $products = Product::where('user_id', $user_id)->orderBy('created_at', 'desc')->withTrashed()->get();
 
         return response()->json(['data' => $products]);
     }
@@ -43,8 +45,6 @@ class ProductController extends Controller
         $data = $req->all();
 
         $data['user_id'] = $req->user()->id;
-
-        // error_log(print_r($data, true));
 
         $newProduct = Product::create($data);
 
@@ -86,9 +86,14 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
 
+        // check to see that the user id hasn't been tampered with in the request 
+        if (Auth::user()->id != $product->user_id) {
+            return response()->json(['error' => 'You cannot change this record',], 403);
+        }
+
         $product->update($req->all());
 
-        return response()->json(['message' => 'Product updated', 'data' => $product], 200);
+        return response()->json(['message' => 'Product updated successfully', 'data' => $product], 200);
     }
 
     /**
@@ -101,6 +106,8 @@ class ProductController extends Controller
     {
         Product::where('id', $id)->delete();
 
-        return response()->json(['message' => 'Product deleted'], 204);
+        $softDeletedProduct = Product::withTrashed()->findOrFail($id);
+
+        return response()->json(['message' => 'Product set to inactive', 'data' => $softDeletedProduct], 200);
     }
 }
