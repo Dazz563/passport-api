@@ -110,4 +110,16 @@ class ProductController extends Controller
 
         return response()->json(['message' => 'Product set to inactive', 'data' => $softDeletedProduct], 200);
     }
+
+    public function restoreProduct($id)
+    {
+        $product = Product::withTrashed()->find($id);
+
+        if ($product) {
+            $product->restore();
+            return response()->json(['message' => 'Product restored successfully', 'data' => $product], 200);
+        } else {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+    }
 }

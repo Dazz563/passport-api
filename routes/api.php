@@ -36,5 +36,6 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/delete_user/{user}', [AdminController::class, 'deleteUser'])->middleware('role:admin');
     Route::put('/restore_user/{id}', [AdminController::class, 'restoreUser'])->middleware('role:admin');
     // Product Routes
+    Route::put('/restore_product/{id}', [ProductController::class, 'restoreProduct'])->middleware('role:admin|vendor');
     Route::resource('/products', ProductController::class)->middleware('role:admin|vendor');
 });
