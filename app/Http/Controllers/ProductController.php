@@ -19,7 +19,11 @@ class ProductController extends Controller
     {
         $user_id = $req->user()->id;
 
-        $products = Product::where('user_id', $user_id)->orderBy('created_at', 'desc')->withTrashed()->get();
+        $products = Product::where('user_id', $user_id)
+            ->orderBy('created_at', 'desc')
+            ->withTrashed()
+            ->with('productImages')
+            ->get();
 
         return response()->json(['data' => $products]);
     }

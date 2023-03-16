@@ -40,5 +40,6 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/restore_product/{id}', [ProductController::class, 'restoreProduct'])->middleware('role:admin|vendor');
     Route::resource('/products', ProductController::class)->middleware('role:admin|vendor');
     // Product Image Routes
-    Route::post('/upload_product_images', [ProductImageController::class, 'uploadProductImages'])->middleware('role:admin|vendor');
+    Route::post('/upload_product_images/{product_id}', [ProductImageController::class, 'uploadProductImages'])->middleware('role:admin|vendor');
+    Route::delete('/delete_product_image/{productImage_id}', [ProductImageController::class, 'deleteProductImage'])->middleware('role:admin|vendor');
 });
