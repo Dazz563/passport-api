@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 
 use Carbon\Carbon;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\ProductImages;
 use Illuminate\Support\Facades\Storage;
@@ -33,7 +34,9 @@ class ProductImageController extends Controller
             $filenames[] = $filename;
         }
 
-        return response()->json(["message" => 'Successfully uploaded your images', "data" => $filenames], 200);
+        $product = Product::with('productImages')->find($product_id);
+
+        return response()->json(["message" => 'Successfully uploaded your images', "data" => $product->productImages], 200);
     }
 
     public function deleteProductImage($productImage_id)
